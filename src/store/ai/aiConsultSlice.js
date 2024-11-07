@@ -149,7 +149,13 @@ export const aiConsultSlice = createSlice({
       state.audio.isErrorOccurred = false;
       state.audio.src = "";
     },
-    resetState: () => initialState,
+    resetState: (state) => {
+      // Reset all state properties except sessionStatus
+      return {
+        ...initialState,
+        sessionStatus: state.sessionStatus, // Preserve sessionStatus
+      };
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(uploadRequest.pending, (state) => {
