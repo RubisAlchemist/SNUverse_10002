@@ -351,8 +351,6 @@
 
 // export default AudioRecorder;
 
-
-
 // 기존 코드
 // import { useEffect, useRef, useState } from "react";
 // import { useDispatch, useSelector } from "react-redux";
@@ -1000,13 +998,7 @@ const AudioRecorder = ({
         }
       }
     };
-<<<<<<< HEAD
-
     initializeMedia();
-
-=======
-    initializeMedia();
->>>>>>> a2f5f24fe01625cd61ec7a42a48d9754c92e3eaa
     return () => {
       isComponentMounted = false;
       cleanupMedia();
