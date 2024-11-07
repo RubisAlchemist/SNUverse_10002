@@ -2,7 +2,6 @@ import VideoCallImage from "@assets/images/videocallImage.png";
 import {
   Box,
   Button,
-  //Container,
   Stack,
   TextField,
   Typography,
@@ -32,6 +31,7 @@ import hallwayKarinaVideo from "@assets/videos/hallway_karina.mp4";
 // SweetAlert2 임포트
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
+import CircularProgress from "@mui/material/CircularProgress"; // MUI 로딩 스피너 추가
 
 const MySwal = withReactContent(Swal);
 
@@ -51,6 +51,8 @@ const AiConsultEntryPageRe = () => {
   // 비디오 재생 상태 및 선택된 비디오
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [hallwayVideo, setHallwayVideo] = useState(null);
+  const [isVideoReady, setIsVideoReady] = useState(false); // 비디오 준비 상태 추가
+  const [isLoading, setIsLoading] = useState(false); // 로딩 상태 추가
 
   const handleAvatarClick = (avatar) => {
     setSelectedAvatar((prev) => (prev === avatar ? null : avatar));
@@ -66,6 +68,8 @@ const AiConsultEntryPageRe = () => {
       });
       return;
     }
+
+    setIsLoading(true); // 버튼을 비활성화
 
     let unameToUse = unameParam;
     const containsKorean = /[ㄱ-ㅎㅏ-ㅣ가-힣]/.test(unameParam);
@@ -97,6 +101,7 @@ const AiConsultEntryPageRe = () => {
         icon: "error",
         confirmButtonText: "확인",
       });
+      setIsLoading(false); // 에러 발생 시 버튼을 다시 활성화
       return;
     }
 
@@ -119,13 +124,31 @@ const AiConsultEntryPageRe = () => {
     }
 
     if (hallwayVideoSrc) {
-      setHallwayVideo(hallwayVideoSrc);
-      setIsVideoPlaying(true);
+      // 비디오 사전 로드
+      const video = document.createElement("video");
+      video.src = hallwayVideoSrc;
+      video.preload = "auto";
+      video.oncanplaythrough = () => {
+        setHallwayVideo(hallwayVideoSrc);
+        setIsVideoReady(true); // 비디오 준비 완료
+        setIsVideoPlaying(true);
+      };
+      video.onerror = () => {
+        console.error("비디오 로드 실패");
+        MySwal.fire({
+          title: "오류",
+          text: "비디오를 로드하는 데 실패했습니다. 다시 시도해주세요.",
+          icon: "error",
+          confirmButtonText: "확인",
+        });
+        setIsLoading(false); // 비디오 로드 실패 시 버튼을 다시 활성화
+      };
     } else {
       // 아바타가 선택되지 않았거나 해당 비디오가 없는 경우 네비게이트
       navigate(
         `/ai-consult/${unameToUse}?phoneNumber=${phoneNumberParam}&selectedAvatar=${selectedAvatar}`
       );
+      setIsLoading(false); // 네비게이트 후 버튼을 다시 활성화 (필요에 따라)
     }
   };
 
@@ -192,7 +215,9 @@ const AiConsultEntryPageRe = () => {
         //sx={{ paddingTop: { xs: '40px', md: '80px' }, backgroundColor: "#b0e977t1" }}
       >
         <Stack spacing={{ xs: 3, md: 4 }} alignItems="center" width="100%">
-          {/* <Box
+          {/* 입력 필드 주석 처리 */}
+          {/* 
+          <Box
             width="100%"
             display="flex"
             flexDirection="column"
@@ -238,7 +263,8 @@ const AiConsultEntryPageRe = () => {
                 maxWidth: "400px",
               }}
             />
-          </Box> */}
+          </Box> 
+          */}
 
           <Box display="flex" justifyContent="center" gap={4}>
             {[
@@ -279,7 +305,7 @@ const AiConsultEntryPageRe = () => {
           <Box display="flex" justifyContent="center">
             <Button
               onClick={onClickStart}
-              disabled={!isButtonEnabled}
+              disabled={!isButtonEnabled || isLoading} // isLoading 상태 추가
               variant="contained"
               sx={{
                 fontFamily: "SUIT Variable",
@@ -295,9 +321,16 @@ const AiConsultEntryPageRe = () => {
                 padding: { xs: "6px 14px", sm: "8px 16px", md: "10px 20px" },
                 fontWeight: "bold",
                 fontSize: { xs: "14px", sm: "16px", md: "20px" },
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
-              상담 시작하기
+              {isLoading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                "상담 시작하기"
+              )}
             </Button>
           </Box>
         </Stack>
@@ -305,12 +338,21 @@ const AiConsultEntryPageRe = () => {
       {/* 영상 오버레이 */}
       {isVideoPlaying && hallwayVideo && (
         <VideoOverlay>
-          <TransitionVideo
-            src={hallwayVideo}
-            autoPlay
-            onEnded={onVideoEnded}
-            controls={false}
-          />
+          {/* 로딩 인디케이터 필요 시 주석 해제 */}
+          {/* {!isVideoReady && (
+            <LoadingContainer>
+              <CircularProgress color="inherit" />
+            </LoadingContainer>
+          )} */}
+          {isVideoReady && (
+            <TransitionVideo
+              src={hallwayVideo}
+              autoPlay
+              onEnded={onVideoEnded}
+              controls={false}
+              style={{ display: isVideoReady ? "block" : "none" }} // 비디오가 준비되었을 때만 표시
+            />
+          )}
         </VideoOverlay>
       )}
     </Container>
@@ -325,18 +367,29 @@ const Container = styled.div`
   flex-direction: column;
 `;
 
-// 영상 오버레이 스타일
+// 영상 오버레이 스타일 (배경색 제거 또는 투명하게 설정)
 const VideoOverlay = styled.div`
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: black; /* 배경색을 검정으로 설정하여 영상이 더욱 돋보이게 함 */
+  background-color: transparent; /* 배경색을 투명으로 설정 */
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 9999; /* 다른 모든 요소보다 위에 표시 */
+`;
+
+// 로딩 인디케이터 스타일 (필요 시 사용)
+const LoadingContainer = styled.div`
+  position: absolute;
+  z-index: 10000; /* 비디오 위에 표시 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 `;
 
 // 영상 스타일

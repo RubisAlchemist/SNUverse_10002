@@ -1,12 +1,17 @@
 import React, { useState, useRef } from "react";
-//import { Box, Button, Container, Stack } from "@mui/material";
+import { Box, Button, Stack, TextField } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { Footer, Header } from "@components/index";
 import homeImage from "@assets/images/homeImage.png";
 import styled, { keyframes } from "styled-components";
-//import { Container } from '@mui/material';
-
 import transitionVideo from "@assets/videos/SNUVERSE_home.mp4";
+
+// SweetAlert2 임포트
+import Swal from "sweetalert2";
+import withReactContent from "sweetalert2-react-content";
+import CircularProgress from "@mui/material/CircularProgress"; // MUI 로딩 스피너 추가
+
+const MySwal = withReactContent(Swal);
 
 const floatAnimation = keyframes`
   0% {
@@ -21,8 +26,6 @@ const floatAnimation = keyframes`
 `;
 
 const ResponsiveImage = styled.img`
-  /* max-height: 150px; */
-  /* max-width: 700px; */
   object-fit: cover;
   margin-bottom: 20px;
 
@@ -59,18 +62,18 @@ const HomePage = () => {
   const navigate = useNavigate();
 
   const [isTransitioning, setIsTransitioning] = useState(false); // 전환 상태 관리
+  const [isLoading, setIsLoading] = useState(false); // 버튼 로딩 상태 관리
   const videoRef = useRef(null); // 비디오 참조
 
   const onClickNavigate = () => {
     setIsTransitioning(true); // 버튼 클릭 시 전환 상태 활성화
+    setIsLoading(true); // 버튼을 비활성화
   };
 
   const handleVideoEnded = () => {
     navigate("/ai-consultEntry"); // 영상 재생 완료 시 네비게이션
   };
 
-  // const onClickNavigate = () => navigate("/AvatarChoosePage");
-  //const onClickNavigate = () => navigate("/ai-consultEntry");
   const onClickLogo = () => navigate("/");
 
   return (
@@ -83,16 +86,18 @@ const HomePage = () => {
           여기서 잠시 머물러 쉬어가세요
         </AnimatedText>
         <ResponsiveImage src={homeImage} alt="Home Image" />
-        <ActionButton onClick={onClickNavigate}>
+        <ActionButton onClick={onClickNavigate} disabled={isLoading}>
+          {/* {isLoading ? (
+            <CircularProgress size={24} color="inherit" />
+          ) : (
+            "AI 심리상담소 입장하기"
+          )} */}
           AI 심리상담소 입장하기
         </ActionButton>
       </Content>
       <Footer />
 
-      {/* 비디오 미리 로드 */}
-      <video style={{ display: "none" }} src={transitionVideo} preload="auto" />
-
-      {/**메타버스 */}
+      {/** 메타버스 */}
       {isTransitioning && (
         <VideoOverlay>
           <TransitionVideo
@@ -101,18 +106,31 @@ const HomePage = () => {
             autoPlay
             onEnded={handleVideoEnded}
             controls={false}
+            onCanPlayThrough={() => {
+              // 비디오가 준비되었을 때
+              // 추가적인 처리가 필요하면 여기에 작성
+            }}
+            onError={() => {
+              console.error("비디오 로드 실패");
+              MySwal.fire({
+                title: "오류",
+                text: "비디오를 로드하는 데 실패했습니다. 다시 시도해주세요.",
+                icon: "error",
+                confirmButtonText: "확인",
+              });
+              setIsTransitioning(false);
+              setIsLoading(false); // 에러 발생 시 버튼을 다시 활성화
+            }}
           />
         </VideoOverlay>
       )}
-      {/**메타버스 */}
+      {/** 메타버스 */}
     </Container>
   );
 };
 
 const Container = styled.div`
   display: flex;
-  //background-color: yellow;
-  //padding-top: HEADER_HEIGHT;
   height: 100vh;
   flex-direction: column;
 `;
@@ -123,42 +141,28 @@ const Content = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  //position: relative; /* AnimatedText의 애니메이션을 위한 상대 위치 */
-  //padding: 20px; /* 필요에 따라 패딩 조정 */
-  //background-color: pink;
 `;
 
 const AnimatedText = styled.div`
-  //font-size: 30px;
   font-weight: 800;
   animation: ${floatAnimation} 3s ease-in-out infinite;
-  //transform: translate(-50%, -50%);
   text-align: center;
   margin-bottom: 20px;
-  //position: absolute;
-  //left: 50%;
-  //top: 15vh;
-  //width: 100%;
-  /* margin-bottom: 50px;
-  margin-top: 30px; */
   cursor: default;
   letter-spacing: 1px;
 
   @media all and (min-width: 1280px) {
     font-size: 30px;
-    //margin-top: 120px;
   }
 
   /* 노트북 & 테블릿 가로 (해상도 1024px ~ 1279px)*/
   @media all and (min-width: 1024px) and (max-width: 1279px) {
     font-size: 28px;
-    //margin-top: 100px;
   }
 
   /* 테블릿 가로 (해상도 768px ~ 1023px)*/
   @media all and (min-width: 768px) and (max-width: 1023px) {
     font-size: 25px;
-    //margin-top: 60px;
   }
 
   /* 모바일 가로 & 테블릿 세로 (해상도 480px ~ 767px)*/
@@ -186,14 +190,21 @@ const ActionButton = styled.button`
   border: none;
   border-radius: 25px;
   cursor: pointer;
-  //font-size: 16px;
   font-weight: bold;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease-in-out, background-color 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
     background-color: #1565c0;
     transform: scale(1.03);
+  }
+
+  &:disabled {
+    background-color: #a0a0a0;
+    cursor: not-allowed;
   }
 
   @media all and (min-width: 1280px) {
@@ -233,7 +244,7 @@ const VideoOverlay = styled.div`
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: black; /* 배경색을 검정으로 설정하여 영상이 더욱 돋보이게 함 */
+  background-color: transparent; /* 배경색을 투명으로 설정 */
   display: flex;
   align-items: center;
   justify-content: center;
