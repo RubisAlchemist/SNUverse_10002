@@ -676,6 +676,7 @@ const AiConsultChannelPage = () => {
   const [showInstruction, setShowInstruction] = useState(true);
   const [isSeamlessLoading, setIsSeamlessLoading] = useState(false);
   const [timestampsArray, setTimestampsArray] = useState([]);
+  const MAX_ERROR_COUNT = 1; // Adjust as needed
 
   const greetingsVideoRef = useRef(null);
   const seamlessVideoRef = useRef(null);
@@ -895,10 +896,16 @@ const AiConsultChannelPage = () => {
     console.log("인사말 비디오 재생 시작");
   };
 
-  const handleGreetingsVideoError = (e) => {
-    console.error("인사말 비디오 재생 오류:", e);
-    dispatch(setAudioErrorOccurred());
-  };
+  const handleGreetingsVideoError = useCallback(
+    (e) => {
+      console.error("인사말 비디오 재생 오류:", e);
+      if (src !== "error" && !isErrorOccurred && errorCount < MAX_ERROR_COUNT) {
+        dispatch(setAudioErrorOccurred());
+        setErrorCount((prev) => prev + 1);
+      }
+    },
+    [dispatch, src, isErrorOccurred, errorCount]
+  );
 
   const handleRecordingStart = () => {
     console.log("녹음 시작");
