@@ -627,10 +627,15 @@ import {
 import { Button, Box, Fade, CircularProgress } from "@mui/material";
 import {
   clearAudioSrc,
+  closeModal,
+  setAudioSrc,
   setGreetingsPlayed,
   setNotePlaying,
   clearNotePlaying,
-  setAudioErrorOccurred,
+  setErrorPlaying, // New action
+  clearErrorPlaying, // New action
+  setAudioErrorOccurred, // 추가된 액션
+  clearAudioErrorOccurred, // 추가된 액션
   resetState,
 } from "@store/ai/aiConsultSlice";
 import { useDispatch, useSelector } from "react-redux";
