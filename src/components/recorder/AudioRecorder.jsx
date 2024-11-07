@@ -784,7 +784,6 @@ import {
   setAudioErrorOccurred,
 } from "@store/ai/aiConsultSlice";
 import PropTypes from "prop-types";
-
 // Import MUI components and icons
 import { makeStyles } from "@mui/styles";
 import GraphicEqIcon from "@mui/icons-material/GraphicEq";
@@ -815,7 +814,6 @@ const useStyles = makeStyles({
     },
   },
 });
-
 const AudioRecorder = ({
   uname,
   phoneNumber,
@@ -827,7 +825,6 @@ const AudioRecorder = ({
   const classes = useStyles();
   const dispatch = useDispatch();
   const current = useSelector((state) => state.aiConsult.audio.current);
-
   const audioContextRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
@@ -851,7 +848,6 @@ const AudioRecorder = ({
     if (!isRecordingAllowed) return "";
     return "상담사에게 말씀해주세요";
   };
-
   useEffect(() => {
     let isComponentMounted = true;
     let analyser = null;
@@ -866,7 +862,6 @@ const AudioRecorder = ({
         setError("Your browser does not support Web Audio API.");
         return;
       }
-
       navigator.mediaDevices
         .getUserMedia({ audio: true })
         .then((mediaStream) => {
@@ -915,12 +910,10 @@ const AudioRecorder = ({
           );
         });
     };
-
     const cleanupMedia = () => {
       if (animationIdRef.current) {
         cancelAnimationFrame(animationIdRef.current);
       }
-
       if (voiceStartTimerRef.current) {
         clearTimeout(voiceStartTimerRef.current);
         voiceStartTimerRef.current = null;
@@ -929,12 +922,10 @@ const AudioRecorder = ({
         clearTimeout(voiceStopTimerRef.current);
         voiceStopTimerRef.current = null;
       }
-
       if (audioContextRef.current) {
         audioContextRef.current.close();
         audioContextRef.current = null;
       }
-
       if (
         mediaRecorderRef.current &&
         mediaRecorderRef.current.state !== "inactive"
@@ -942,7 +933,6 @@ const AudioRecorder = ({
         mediaRecorderRef.current.stop();
         mediaRecorderRef.current = null;
       }
-
       if (stream) {
         stream.getTracks().forEach((track) => {
           track.stop();
@@ -977,13 +967,11 @@ const AudioRecorder = ({
           animationIdRef.current = requestAnimationFrame(detectVoice);
           return;
         }
-
         if (currentVolume > threshold) {
           if (voiceStopTimerRef.current) {
             clearTimeout(voiceStopTimerRef.current);
             voiceStopTimerRef.current = null;
           }
-
           if (!isRecordingRef.current && !voiceStartTimerRef.current) {
             voiceStartTimerRef.current = setTimeout(() => {
               startRecording();
@@ -995,7 +983,6 @@ const AudioRecorder = ({
             clearTimeout(voiceStartTimerRef.current);
             voiceStartTimerRef.current = null;
           }
-
           if (isRecordingRef.current && !voiceStopTimerRef.current) {
             voiceStopTimerRef.current = setTimeout(() => {
               stopRecording();
@@ -1003,7 +990,6 @@ const AudioRecorder = ({
             }, VOICE_STOP_DEBOUNCE);
           }
         }
-
         animationIdRef.current = requestAnimationFrame(detectVoice);
       } catch (error) {
         console.error("Error in detectVoice:", error);
@@ -1014,21 +1000,23 @@ const AudioRecorder = ({
         }
       }
     };
+<<<<<<< HEAD
 
     initializeMedia();
 
+=======
+    initializeMedia();
+>>>>>>> a2f5f24fe01625cd61ec7a42a48d9754c92e3eaa
     return () => {
       isComponentMounted = false;
       cleanupMedia();
     };
   }, [isRecordingAllowed, dispatch]);
-
   useEffect(() => {
     if (!isRecordingAllowed && isRecordingRef.current) {
       stopRecording();
     }
   }, [isRecordingAllowed]);
-
   const startRecording = () => {
     if (
       mediaRecorderRef.current &&
@@ -1043,7 +1031,6 @@ const AudioRecorder = ({
       }
     }
   };
-
   const stopRecording = () => {
     if (
       mediaRecorderRef.current &&
@@ -1055,7 +1042,6 @@ const AudioRecorder = ({
       console.log("Recording stopped");
     }
   };
-
   const handleRecordingStop = () => {
     if (isUploadingRef.current) {
       console.warn("Already uploading. Not starting a new upload.");
@@ -1069,7 +1055,6 @@ const AudioRecorder = ({
     if (onRecordingStop) {
       onRecordingStop(requestSentTime);
     }
-
     const formData = new FormData();
     formData.append("audio", blob, `${uname}_audio_${current}.webm`);
     formData.append("uname", uname);
@@ -1090,16 +1075,16 @@ const AudioRecorder = ({
       .finally(() => {
         isUploadingRef.current = false;
       });
-
     dispatch(setNotePlaying());
   };
-
   return (
-    <Box sx={{
-      textAlign: "center",
-      marginTop: "10px",
-      //backgroundColor: "lightblue",
-    }}>
+    <Box
+      sx={{
+        textAlign: "center",
+        marginTop: "10px",
+        //backgroundColor: "lightblue",
+      }}
+    >
       {/* Recording Icon */}
       <Box
         sx={{
@@ -1113,18 +1098,19 @@ const AudioRecorder = ({
         }}
       >
         {!isRecordingAllowed ? (
-          <MicOffIcon className={classes.icon}
-          sx={{
-            fontSize: { xs: "35px", sm: "45px", md: "55px", lg: "65px" },
-            color: "gray",
-          }}
+          <MicOffIcon
+            className={classes.icon}
+            sx={{
+              fontSize: { xs: "35px", sm: "45px", md: "55px", lg: "65px" },
+              color: "gray",
+            }}
           />
         ) : (
           <GraphicEqIcon
             className={`${classes.icon} ${isRecording ? classes.animate : ""}`}
             sx={{
               fontSize: { xs: "35px", sm: "45px", md: "55px", lg: "65px" },
-              color: isRecording ? "#4caf50" : "gray",
+              color: isRecording ? "#4CAF50" : "gray",
             }}
           />
         )}
@@ -1133,21 +1119,20 @@ const AudioRecorder = ({
         sx={{
           marginTop: "0px",
           fontSize: { xs: "14px", sm: "16px", md: "18px", lg: "20px" },
-          color: isRecording ? "#4caf50" : "gray",
+          color: isRecording ? "#4CAF50" : "gray",
           minHeight: "1em",
           //backgroundColor: "lightcoral",
         }}
       >
         {getRecordingStatusMessage()}
       </Typography>
-
       {/* Error Message */}
       {error && (
-      <Typography sx={{ color: "red", backgroundColor: "lightyellow" }}>
-        {error}
-      </Typography>
-    )}
-  </Box>
+        <Typography sx={{ color: "red", backgroundColor: "lightyellow" }}>
+          {error}
+        </Typography>
+      )}
+    </Box>
   );
   // return (
   //   <div
@@ -1203,7 +1188,6 @@ const AudioRecorder = ({
   //   </div>
   // );
 };
-
 AudioRecorder.propTypes = {
   uname: PropTypes.string.isRequired,
   phoneNumber: PropTypes.string.isRequired,
@@ -1212,5 +1196,4 @@ AudioRecorder.propTypes = {
   onRecordingStop: PropTypes.func,
   isRecordingAllowed: PropTypes.bool.isRequired,
 };
-
 export default AudioRecorder;

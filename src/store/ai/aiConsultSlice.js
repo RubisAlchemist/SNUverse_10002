@@ -143,10 +143,13 @@ export const aiConsultSlice = createSlice({
     },
     setAudioErrorOccurred: (state) => {
       state.audio.isErrorOccurred = true;
+      state.audio.src = "error"; // src를 'error'로 설정
     },
     clearAudioErrorOccurred: (state) => {
       state.audio.isErrorOccurred = false;
+      state.audio.src = "";
     },
+    resetState: () => initialState,
   },
   extraReducers: (builder) => {
     builder.addCase(uploadRequest.pending, (state) => {
@@ -202,6 +205,7 @@ export const {
   clearErrorPlaying, // New action
   setAudioErrorOccurred, // 추가된 액션
   clearAudioErrorOccurred, // 추가된 액션
+  resetState,
 } = aiConsultSlice.actions;
 
 export default aiConsultSlice.reducer;

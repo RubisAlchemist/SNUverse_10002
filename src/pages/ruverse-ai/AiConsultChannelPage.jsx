@@ -631,6 +631,7 @@ import {
   setNotePlaying,
   clearNotePlaying,
   setAudioErrorOccurred,
+  resetState,
 } from "@store/ai/aiConsultSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
@@ -679,6 +680,9 @@ const AiConsultChannelPage = () => {
   // State variables to track video pause due to AirPod removal
   const [isVideoPausedBySystem, setIsVideoPausedBySystem] = useState(false);
   const userInitiatedPause = useRef(false);
+  const isErrorOccurred = useSelector(
+    (state) => state.aiConsult.audio.isErrorOccurred
+  );
 
   // Redux 상태 가져오기
   const audioSources = useSelector((state) => state.aiConsult.audio);
@@ -769,6 +773,10 @@ const AiConsultChannelPage = () => {
   }, []);
 
   useEffect(() => {
+    dispatch(resetState());
+  }, [dispatch]);
+
+  useEffect(() => {
     const handleKeyPress = (e) => {
       if (e.key === "F5" || (e.ctrlKey && e.key === "r")) {
         e.preventDefault();
@@ -802,7 +810,7 @@ const AiConsultChannelPage = () => {
         } else {
           console.warn("선택된 인사말 비디오 소스가 없습니다.");
         }
-      } else if (src === "error") {
+      } else if (src === "error" || isErrorOccurred) {
         console.log("에러 비디오 재생");
         setOverlayVideo(errorSrc);
         setIsSeamlessPlaying(false);
@@ -829,6 +837,7 @@ const AiConsultChannelPage = () => {
     isSeamlessPlaying,
     dispatch,
     sessionStatus,
+    isErrorOccurred,
   ]);
 
   // overlay 비디오 종료 핸들러
@@ -841,6 +850,7 @@ const AiConsultChannelPage = () => {
     } else if (src === "error") {
       console.log("에러 비디오 재생 종료");
       dispatch(clearAudioSrc()); // src를 초기화하여 에러 비디오가 다시 재생되지 않도록 함
+      dispatch(clearAudioErrorOccurred()); // isErrorOccurred 초기화
     }
     setOverlayVideo(null);
     setIsAnswerButtonEnabled(true);
@@ -1108,7 +1118,7 @@ const AiConsultChannelPage = () => {
             bgcolor="transparent"
             zIndex={4}
           >
-            <CircularProgress />
+            {/* <CircularProgress /> */}
           </Box>
         )}
 
