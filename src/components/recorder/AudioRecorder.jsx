@@ -833,7 +833,7 @@ const AudioRecorder = ({
   const voiceStopTimerRef = useRef(null);
 
   const VOICE_START_DEBOUNCE = 50;
-  const VOICE_STOP_DEBOUNCE = 1000;
+  const VOICE_STOP_DEBOUNCE = 2200;
 
   const isUploadingRef = useRef(false);
 
