@@ -744,7 +744,8 @@ const AiConsultChannelPage = () => {
       }).then((result) => {
         if (result.isConfirmed) {
           window.open(
-            "https://docs.google.com/forms/d/e/1FAIpQLScdd0osi9M_RWAnjnCEjaku49Cee7jMhkIpZF9VnUBfzQy2ZQ/viewform"
+            //"https://docs.google.com/forms/d/e/1FAIpQLScdd0osi9M_RWAnjnCEjaku49Cee7jMhkIpZF9VnUBfzQy2ZQ/viewform"
+            "https://forms.gle/Wm3uUVLrKvHJKWby6"
           );
           handleEndConsultation();
         } else if (result.isDismissed) {
